@@ -1,4 +1,6 @@
 #include "RS485Handler.h"
+#include "ErrorHandler.h"
+extern ErrorHandler errorHandler; // Declare the external instance
 
 RS485Handler::RS485Handler(int enablePin)
     : _enablePin(enablePin) {}
@@ -30,6 +32,9 @@ String RS485Handler::receive() {
     String receivedData = "";
     while (Serial1.available()) {
         receivedData += (char)Serial1.read();
+    }
+    if (receivedData.length() == 0) {
+        errorHandler.setError(true); // Set error state if no data is received
     }
     return receivedData;
 }

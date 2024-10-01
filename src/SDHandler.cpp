@@ -1,4 +1,6 @@
 #include "SDHandler.h"
+#include "ErrorHandler.h"
+extern ErrorHandler errorHandler; // Declare the external instance
 
 SDHandler::SDHandler(int chipSelect)
     : _chipSelect(chipSelect), _currentLogNumber(1) {}
@@ -20,6 +22,7 @@ bool SDHandler::logData(const String& data) {
         logFile.close();
         return true;
     }
+    errorHandler.setError(true); // Set error state if logging fails
     return false;
 }
 

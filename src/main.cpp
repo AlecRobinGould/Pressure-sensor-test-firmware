@@ -3,11 +3,15 @@
 #include "ButtonHandler.h"
 #include "SDHandler.h"
 #include "RS485Handler.h"
+#include "ErrorHandler.h"
 
 // Pin definitions
 const int chipSelect = 4;
 const int enablePin = 8;
 const int buttonPin = 7;
+const int errorPin = 4;
+
+
 
 // variables
 double voltage;
@@ -20,15 +24,18 @@ ADCHandler adcHandler(0x48, 0x49);
 ButtonHandler buttonHandler(buttonPin);
 SDHandler sdHandler(chipSelect);
 RS485Handler rs485Handler(enablePin);
+ErrorHandler errorHandler(errorPin);
 
 void setup() {
     Serial.begin(9600);
+    errorHandler.begin();
     adcHandler.begin();
     buttonHandler.begin(); // Initializes the button and sets up the interrupt
     if (sdHandler.begin()) {
         Serial.println("SD card initialized.");
     } else {
         Serial.println("SD card initialization failed!");
+        errorHandler.setError(true); // Set error state
     }
     rs485Handler.begin(9600);
     cleaner = false;

@@ -1,6 +1,7 @@
 #include "ButtonHandler.h"
 
 volatile bool ButtonHandler::logState = false; // Initialize static variable
+unsigned long ButtonHandler::lastInterruptTime = 0; // Initialize static variable
 
 ButtonHandler::ButtonHandler(int pin, unsigned long debounceDelay)
     : _pin(pin), _debounceDelay(debounceDelay), _lastDebounceTime(0),
@@ -8,7 +9,7 @@ ButtonHandler::ButtonHandler(int pin, unsigned long debounceDelay)
 
 void ButtonHandler::begin() {
     pinMode(_pin, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(_pin), toggleLogState, FALLING); 
+    attachInterrupt(digitalPinToInterrupt(_pin), toggleLogState, FALLING);
 }
 
 void ButtonHandler::update() {
@@ -44,5 +45,9 @@ bool ButtonHandler::isPressed() {
 }
 
 void ButtonHandler::toggleLogState() {
-    logState = !logState; // Toggle the logState variable
+    unsigned long currentTime = millis();
+    if (currentTime - lastInterruptTime > 50) { // Debounce time of 50 ms
+        logState = !logState;
+        lastInterruptTime = currentTime;
+    }
 }
