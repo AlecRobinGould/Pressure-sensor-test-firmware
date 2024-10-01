@@ -1,11 +1,14 @@
 #include "ButtonHandler.h"
 
+volatile bool ButtonHandler::logState = false; // Initialize static variable
+
 ButtonHandler::ButtonHandler(int pin, unsigned long debounceDelay)
     : _pin(pin), _debounceDelay(debounceDelay), _lastDebounceTime(0),
-      _buttonState(HIGH), _lastButtonState(HIGH), _isPressed(false), logState(false) {}
+      _buttonState(HIGH), _lastButtonState(HIGH), _isPressed(false) {}
 
 void ButtonHandler::begin() {
     pinMode(_pin, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(_pin), toggleLogState, FALLING); 
 }
 
 void ButtonHandler::update() {
@@ -38,4 +41,8 @@ bool ButtonHandler::isPressed() {
         return true;
     }
     return false;
+}
+
+void ButtonHandler::toggleLogState() {
+    logState = !logState; // Toggle the logState variable
 }

@@ -10,6 +10,8 @@ public:
     void update();
     bool isPressed();
     bool logState;
+    static void toggleLogState(); // ISR function must be static
+    volatile static bool logState; // Needs to be volatile since it’s used in ISR
 
 private:
     int _pin;

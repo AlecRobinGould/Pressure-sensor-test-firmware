@@ -13,6 +13,7 @@ const int buttonPin = 7;
 double voltage;
 String logData, pressure;
 char pfeiffer[11];
+bool cleaner; //manage log string and names
 
 // Create handler objects
 ADCHandler adcHandler(0x48, 0x49);
@@ -23,18 +24,18 @@ RS485Handler rs485Handler(enablePin);
 void setup() {
     Serial.begin(9600);
     adcHandler.begin();
-    buttonHandler.begin();
+    buttonHandler.begin(); // Initializes the button and sets up the interrupt
     if (sdHandler.begin()) {
         Serial.println("SD card initialized.");
     } else {
         Serial.println("SD card initialization failed!");
     }
     rs485Handler.begin(9600);
+    cleaner = false;
 }
 
 void loop() {
-    buttonHandler.update();
-    if (buttonHandler.logState){
+    if (ButtonHandler::logState) {
         Serial.println("Button pressed. Logging data...");
         for (uint8_t channel = 0; channel < 8; channel++) {
             int16_t adcValue = adcHandler.readChannel(channel);
@@ -50,9 +51,11 @@ void loop() {
         sdHandler.logData(logData);
         Serial.println(logData);
         delay(450);
+        cleaner = true;
     }
-    else{
+    if (ButtonHandler::logState == false && cleaner) {
         logData = "";
         sdHandler.logIncrement();
+        cleaner = false;
     }
 }
