@@ -10,6 +10,7 @@ public:
     void update();
     bool isPressed();
     static void toggleLogState(); // ISR function must be static
+    void checkSerialForButtonPress();  // Add this method for simulating button press via Serial
     volatile static bool logState;
     static unsigned long lastInterruptTime; // Last interrupt time for debouncing
 

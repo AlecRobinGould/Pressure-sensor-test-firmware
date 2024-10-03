@@ -42,6 +42,7 @@ void setup() {
 }
 
 void loop() {
+    buttonHandler.checkSerialForButtonPress();  // Check for serial input to simulate button press
     if (ButtonHandler::logState) {
         Serial.println("Button pressed. Logging data...");
         for (uint8_t channel = 0; channel < 8; channel++) {

@@ -51,3 +51,16 @@ void ButtonHandler::toggleLogState() {
         lastInterruptTime = currentTime;
     }
 }
+
+void ButtonHandler::checkSerialForButtonPress() {
+    if (Serial.available()) {
+        char input = Serial.read();
+        if (input == 'p') {  // Simulate button press with 'p'
+            logState = true;
+            Serial.println("Simulated button press from serial.");
+        } else if (input == 'r') {  // Simulate button release with 'r'
+            logState = false;
+            Serial.println("Simulated button release from serial.");
+        }
+    }
+}
