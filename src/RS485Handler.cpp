@@ -34,7 +34,7 @@ String RS485Handler::receive() {
         receivedData += (char)Serial1.read();
     }
     if (receivedData.length() == 0) {
-        errorHandler.setError(true); // Set error state if no data is received
+        errorHandler.setError(RS485_FAIL); // Set error state if no data is received
     }
     return receivedData;
 }

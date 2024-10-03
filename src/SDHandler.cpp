@@ -22,7 +22,7 @@ bool SDHandler::logData(const String& data) {
         logFile.close();
         return true;
     }
-    errorHandler.setError(true); // Set error state if logging fails
+    errorHandler.setError(SD_LOG_FAIL); // Set error state if logging fails
     return false;
 }
 

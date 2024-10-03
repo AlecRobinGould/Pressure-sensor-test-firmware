@@ -24,7 +24,7 @@ ADCHandler adcHandler(0x48, 0x49);
 ButtonHandler buttonHandler(buttonPin);
 SDHandler sdHandler(chipSelect);
 RS485Handler rs485Handler(enablePin);
-ErrorHandler errorHandler(errorPin);
+ErrorHandler errorHandler(errorPin, sdHandler);
 
 void setup() {
     Serial.begin(9600);
@@ -35,7 +35,7 @@ void setup() {
         Serial.println("SD card initialized.");
     } else {
         Serial.println("SD card initialization failed!");
-        errorHandler.setError(true); // Set error state
+        errorHandler.setError(SD_INIT_FAIL);
     }
     rs485Handler.begin(9600);
     cleaner = false;
@@ -55,8 +55,11 @@ void loop() {
         strncpy(pfeiffer, &pressure[2], sizeof(pfeiffer));
         logData += String(pfeiffer);
 
-        sdHandler.logData(logData);
-        Serial.println(logData);
+        if (!sdHandler.logData(logData)) {
+            errorHandler.setError(SD_LOG_FAIL);
+        } else {
+            Serial.println(logData);
+        }
         delay(450);
         cleaner = true;
     }
@@ -65,4 +68,5 @@ void loop() {
         sdHandler.logIncrement();
         cleaner = false;
     }
+    errorHandler.update(); // Ensure errorHandler's update method is called regularly
 }
