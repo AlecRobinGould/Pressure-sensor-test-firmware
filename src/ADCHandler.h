@@ -17,7 +17,7 @@ private:
     uint8_t _address1, _address2;
     void writeConfig(uint8_t address, uint8_t mux, uint8_t sps);
     int16_t readConversion(uint8_t address);
-    const int _resolution;
+    const long _resolution;
 };
 
 #endif

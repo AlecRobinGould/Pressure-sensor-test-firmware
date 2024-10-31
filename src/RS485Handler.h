@@ -5,13 +5,14 @@
 
 class RS485Handler {
 public:
-    RS485Handler(int enablePin);
-    void begin(long baudRate);
+    RS485Handler(int enablePin, long baudrate);
+    bool begin();
     void send(const int data);
     String receive();
 
 private:
     int _enablePin;
+    long _baudrate;
 };
 
 #endif

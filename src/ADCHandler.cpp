@@ -5,7 +5,7 @@ const uint8_t CONVERSION_REG = 0x00;
 const uint8_t AINmux[] = { B100, B101, B110, B111, B100, B101, B110, B111 };
 
 ADCHandler::ADCHandler(uint8_t address1, uint8_t address2)
-    : _address1(address1), _address2(address2), _resolution(32768), invResolution(1/_resolution), refVoltage(4.096) {}
+    :  refVoltage(4.096), invResolution(1.0/32768.0),_address1(address1), _address2(address2), _resolution(32768.0) {}
 
 void ADCHandler::begin() {
     Wire.begin();
@@ -13,7 +13,7 @@ void ADCHandler::begin() {
 
 int16_t ADCHandler::readChannel(uint8_t channel) {
     if (channel < 4) {
-        writeConfig(_address1, AINmux[channel], B100); // Example: Set sample rate to 128 SPS
+        writeConfig(_address1, AINmux[channel], B010); // Example: Set sample rate to 32 SPS
         return readConversion(_address1);
     } else {
         writeConfig(_address2, AINmux[channel], B100);
