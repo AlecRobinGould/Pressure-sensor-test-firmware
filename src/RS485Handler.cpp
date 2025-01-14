@@ -7,7 +7,15 @@ RS485Handler::RS485Handler(int enablePin, long baudrate)
 
 bool RS485Handler::begin() {
     Serial1.begin(_baudrate);
-    while (!Serial1) {}
+    uint16_t timeout = 0;
+    while (!Serial1) {
+        timeout++;
+        delay(1);
+        if (timeout > 3000) {
+            errorHandler.setError(RS485_FAIL); // Set error state if RS485 communication fails
+            return false;
+        }
+    }
     if (Serial1){
         pinMode(_enablePin, OUTPUT);
         digitalWrite(_enablePin, LOW); // Disable RS485 driver
@@ -32,15 +40,32 @@ void RS485Handler::send(const int data) {
     Serial1.write(data);
     Serial1.flush();
     digitalWrite(_enablePin, LOW); // Disable RS485 driver
+
+    
 }
 
 String RS485Handler::receive() {
     String receivedData = "";
-    while (Serial1.available() == 0) {}
+
+    uint8_t timeout = 0; // timeout counter
+    uint8_t limit = 100; // 100 ms
+    while (Serial1.available() == 0 && timeout < limit) {
+        // Add timeout
+        timeout++;
+        delayMicroseconds(1000);
+
+    }
+    timeout = 0;
     receivedData = Serial1.readString();
+
+    Serial.print("received: ");
+    Serial.println(receivedData);
     
     if (receivedData.length() == 0) {
         errorHandler.setError(RS485_FAIL); // Set error state if no data is received
+    }
+    else if (errorHandler.isErrorActive(RS485_FAIL)) {
+        errorHandler.clearError(RS485_FAIL); // Clear error state if data is sent successfully
     }
     return receivedData;
 }

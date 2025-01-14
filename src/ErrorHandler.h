@@ -10,18 +10,24 @@ enum ErrorType {
     SD_LOG_FAIL,
     ADC_FAIL,
     RS485_FAIL,
-    NO_ERROR
+    NO_ERROR,
+    ERROR_COUNT
 };
 
 class ErrorHandler {
 public:
     ErrorHandler(int errorPin, SDHandler& sdHandler);
-    void begin();
     void setError(ErrorType error);
+    void clearError(ErrorType error);
+    bool isErrorActive(ErrorType error) const;
+
+    void begin();
+    void setLED(bool state);
     bool hasError() const;
     void update();
 
 private:
+    bool errorStates[ERROR_COUNT];
     int _errorPin;
     bool _errorState;
     ErrorType _currentError;

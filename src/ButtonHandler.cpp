@@ -2,51 +2,27 @@
 
 volatile bool ButtonHandler::logState = false; // Initialize static variable
 unsigned long ButtonHandler::lastInterruptTime = 0; // Initialize static variable
+int ButtonHandler::buttonPin = 0;
 
 ButtonHandler::ButtonHandler(int pin, unsigned long debounceDelay)
     : _pin(pin), _debounceDelay(debounceDelay), _lastDebounceTime(0),
-      _buttonState(HIGH), _lastButtonState(HIGH), _isPressed(false) {}
+      _buttonState(HIGH), _lastButtonState(HIGH), _isPressed(false) {buttonPin = pin;}
 
 void ButtonHandler::begin() {
     pinMode(_pin, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(_pin), toggleLogState, FALLING);
-}
-
-void ButtonHandler::update() {
-    int reading = digitalRead(_pin);
-    if (reading != _lastButtonState) {
-        _lastDebounceTime = millis();
-    }
-
-    if ((millis() - _lastDebounceTime) > _debounceDelay) {
-        if (reading != _buttonState) {
-            _buttonState = reading;
-            if (_buttonState == LOW) {
-                _isPressed = true;
-                if(logState){
-                    logState = false;
-                }
-                else{
-                    logState = true;
-                }
-            }
-        }
-    }
-
-    _lastButtonState = reading;
-}
-
-bool ButtonHandler::isPressed() {
-    if (_isPressed) {
-        _isPressed = false;
-        return true;
-    }
-    return false;
+    attachInterrupt(digitalPinToInterrupt(_pin),toggleLogState, FALLING);
+    lastInterruptTime = millis();
 }
 
 void ButtonHandler::toggleLogState() {
     unsigned long currentTime = millis();
-    if (currentTime - lastInterruptTime > 50) { // Debounce time of 50 ms
+    int reading = digitalRead(buttonPin);
+    while (!reading){reading = digitalRead(buttonPin);}
+    // Serial.println("Times:");
+    // Serial.println(currentTime);
+    // Serial.println("end");
+    // Serial.println(lastInterruptTime);
+    if (currentTime - lastInterruptTime >= 150 && reading) { // Debounce time of 50 ms
         logState = !logState;
         lastInterruptTime = currentTime;
     }

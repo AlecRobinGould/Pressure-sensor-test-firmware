@@ -5,7 +5,7 @@
 
 class ButtonHandler {
 public:
-    ButtonHandler(int pin, unsigned long debounceDelay = 50);
+    ButtonHandler(int pin, unsigned long debounceDelay = 150);
     void begin();
     void update();
     bool isPressed();
@@ -13,6 +13,7 @@ public:
     void checkSerialForButtonPress();  // Add this method for simulating button press via Serial
     volatile static bool logState;
     static unsigned long lastInterruptTime; // Last interrupt time for debouncing
+    static int buttonPin;
 
 private:
     int _pin;

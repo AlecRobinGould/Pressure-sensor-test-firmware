@@ -9,21 +9,22 @@
 const int chipSelect = 4;
 const int enablePin = 8;
 const int buttonPin = 7;
-const int errorPin = 5;
+const int errorPin = 6;
+const int logLEDPin = 5;
 long baudrate = 9600;
 
 
 
 // variables
 double voltage;
-String logData, pressure;
+String logDataS, pressure;
 char pfeiffer[11];
 bool cleaner; //manage log string and names
 
 // Create handler objects
 ADCHandler adcHandler(0x48, 0x49);
 ButtonHandler buttonHandler(buttonPin);
-SDHandler sdHandler(chipSelect);
+SDHandler sdHandler(chipSelect, logLEDPin);
 RS485Handler rs485Handler(enablePin, baudrate);
 ErrorHandler errorHandler(errorPin, sdHandler);
 
@@ -57,11 +58,16 @@ void loop() {
         Serial.println("Button pressed. Logging data...");
         for (uint8_t channel = 0; channel < 8; channel++) {
             int16_t adcValue = adcHandler.readChannel(channel);
-            Serial.print("ADC value: ");
-            Serial.println(adcValue);
+            if (adcValue >= -1) {
+                errorHandler.setError(ADC_FAIL);
+            }
+            else if (errorHandler.isErrorActive(ADC_FAIL)) {
+                errorHandler.clearError(ADC_FAIL);
+
+            }
             voltage = adcValue * adcHandler.refVoltage * adcHandler.invResolution;
-            logData += String(voltage, 4);
-            logData += ", ";            
+            logDataS += String(voltage, 4);
+            logDataS += ", ";            
         }
         
         pressure = "";
@@ -70,20 +76,37 @@ void loop() {
         Serial.print("Pressure: ");
         Serial.println(pressure);
         strncpy(pfeiffer, &pressure[2], sizeof(pfeiffer));
-        logData += String(pfeiffer);
+        logDataS += String(pfeiffer);
 
-        if (!sdHandler.logData(logData)) {
-            errorHandler.setError(SD_LOG_FAIL);
+        if (!sdHandler.logData(logDataS)) {
+            // errorHandler.setError(SD_LOG_FAIL);
+            while (!sdHandler.begin()){
+                Serial.println("Trying to initialize SD card...");
+                // delay(200);
+                errorHandler.setLED(true);
+                delay(300);
+                errorHandler.setLED(false);
+            }
+            if (errorHandler.hasError()) {
+                errorHandler.setLED(true);
+            }
+            else{
+                errorHandler.setLED(false);
+            }
         } else {
+            if (errorHandler.isErrorActive(SD_LOG_FAIL)) {
+                errorHandler.clearError(SD_LOG_FAIL);
+                errorHandler.clearError(SD_INIT_FAIL);
+            }
             Serial.print("logdata: ");
-            Serial.println(logData);
+            Serial.println(logDataS);
         }
         delay(450);
         cleaner = true;
-        logData = "";
+        logDataS = "";
     }
     if (ButtonHandler::logState == false && cleaner) {
-        logData = "";
+        logDataS = "";
         sdHandler.logIncrement();
         cleaner = false;
     }
