@@ -8,7 +8,7 @@ public:
     RS485Handler(int enablePin, long baudrate);
     bool begin();
     void send(const int data);
-    String receive();
+    String receive(unsigned long baseTime, unsigned long timeCorrection);
 
 private:
     int _enablePin;

@@ -17,6 +17,7 @@ bool SDHandler::begin() {
 }
 
 bool SDHandler::logData(const String& data) {
+
     if (!logFile.open(_logFileName.c_str(), O_APPEND | O_WRITE)) {
         errorHandler.setError(SD_LOG_FAIL); // Set error state if logging fails
         return false;
@@ -28,13 +29,13 @@ bool SDHandler::logData(const String& data) {
         }
     }
     digitalWrite(_logLEDPin, LOW);  // Turn onLED
-    // Serial.print("Filename: ");
-    // Serial.println(_logFileName);
+    // Serial.println("LED on");
 
     logFile.println(data.c_str());
     logFile.sync(); // Ensure data is written to SD card
     logFile.close();
     digitalWrite(_logLEDPin, HIGH);  // Turn off LED
+    // Serial.println("LED off");
     return true;
 }
 

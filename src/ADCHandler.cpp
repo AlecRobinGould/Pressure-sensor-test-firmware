@@ -1,7 +1,7 @@
 /*****************************************
-* Library for the ADS1115
+* Library for the ADS1115 Analog-to-Digital Converter
 *
-* Written by Alec Robin Gould
+* Written by Alec R Gould, owned by EMSS Antennas Pty Ltd.
 *
 *******************************************/
 #include "ADCHandler.h"
@@ -15,35 +15,6 @@ ADCHandler::ADCHandler(uint8_t address1, uint8_t address2)
 
 void ADCHandler::begin() {
     Wire.begin();
-}
-
-void ADCHandler::setRefVoltage(double voltage) {
-    refVoltage = voltage;
-}
-
-void ADCHandler::setResolution(uint16_t res) {
-    _resolution = res;
-    invResolution = 1.0 / static_cast<double>(res);
-}
-
-void ADCHandler::setSampleRate(uint8_t sps) {
-    _currentSPS = sps & 0x07; // Ensure SPS is within valid range
-}
-
-double ADCHandler::getVoltage(int16_t rawValue) const {
-    return rawValue * refVoltage * invResolution;
-}
-
-int16_t ADCHandler::readChannel(uint8_t channel) {
-    if (channel >= 8) {
-        // Handle invalid channel
-        return -1; // Return an error value
-    }
-    if (channel < 4) {
-        return readConversion(_address1, AINmux[channel]);
-    } else {
-        return readConversion(_address2, AINmux[channel]);
-    }
 }
 
 int16_t ADCHandler::writeConfig(uint8_t address, uint8_t mux, uint8_t sps) {
@@ -101,4 +72,33 @@ int16_t ADCHandler::readConversion(uint8_t address, uint8_t channel) {
     // Combine MSB and LSB into a single 16-bit signed value
     int16_t result = (msb << 8) | lsb;
     return result;
+}
+
+void ADCHandler::setRefVoltage(double voltage) {
+    refVoltage = voltage;
+}
+
+void ADCHandler::setResolution(uint16_t res) {
+    _resolution = res;
+    invResolution = 1.0 / static_cast<double>(res);
+}
+
+void ADCHandler::setSampleRate(uint8_t sps) {
+    _currentSPS = sps & 0x07; // Ensure SPS is within valid range
+}
+
+double ADCHandler::getVoltage(int16_t rawValue) const {
+    return rawValue * refVoltage * invResolution;
+}
+
+int16_t ADCHandler::readChannel(uint8_t channel) {
+    if (channel >= 8) {
+        // Handle invalid channel
+        return -1; // Return an error value
+    }
+    if (channel < 4) {
+        return readConversion(_address1, AINmux[channel]);
+    } else {
+        return readConversion(_address2, AINmux[channel]);
+    }
 }

@@ -15,7 +15,7 @@ void ErrorHandler::begin() {
 }
 
 void ErrorHandler::setLED(bool state) {
-    digitalWrite(_errorPin, state ? HIGH : LOW);
+    digitalWrite(_errorPin, state ? LOW : HIGH);
 }
 
 void ErrorHandler::clearError(ErrorType error) {
@@ -39,6 +39,7 @@ bool ErrorHandler::isErrorActive(ErrorType error) const {
 }
 
 void ErrorHandler::setError(ErrorType error) {
+    // Serial.println(error);
     if (error < ERROR_COUNT) {
         errorStates[error] = true;
     }
@@ -53,17 +54,19 @@ void ErrorHandler::setError(ErrorType error) {
             case RS485_FAIL: errorMessage = "RS485 Communication Failed"; break;
             default: break;
         }
-
-        if (_currentError == SD_INIT_FAIL || _currentError == SD_LOG_FAIL) {
-            digitalWrite(_errorPin, LOW);  // Turn on LED if error is SD card related
-        }
-        else if (_sdHandler.logData(errorMessage)) {
-            digitalWrite(_errorPin, LOW); // Static LED since SD card logging succeeded
-        } else {
-            digitalWrite(_errorPin, HIGH);  // Set LED to start blinking if log failed
-        }
+        setLED(true);
+        // if (_currentError == SD_INIT_FAIL || _currentError == SD_LOG_FAIL) {
+        //     digitalWrite(_errorPin, LOW);  // Turn on LED if error is SD card related
+        // }
+        // // else if (_sdHandler.logData(errorMessage)) {
+        // //     digitalWrite(_errorPin, LOW); // Static LED since SD card logging succeeded
+        // // } 
+        // else {
+        //     digitalWrite(_errorPin, HIGH);  // Set LED to start blinking if log failed
+        // }
     } else {
-        digitalWrite(_errorPin, HIGH);  // Turn off LED if no error
+        setLED(false);
+        // digitalWrite(_errorPin, HIGH);  // Turn off LED if no error
     }
 }
 

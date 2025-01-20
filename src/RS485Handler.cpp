@@ -19,7 +19,7 @@ bool RS485Handler::begin() {
     if (Serial1){
         pinMode(_enablePin, OUTPUT);
         digitalWrite(_enablePin, LOW); // Disable RS485 driver
-        Serial1.setTimeout(20);  //[ms] default is 1 s
+        Serial1.setTimeout(200);  //[ms] default is 1 s
 
         digitalWrite(_enablePin, HIGH); // Disable RS485 driver
         Serial1.print("PR1");    // Request gauge 1
@@ -35,34 +35,35 @@ bool RS485Handler::begin() {
 
 void RS485Handler::send(const int data) {
     digitalWrite(_enablePin, HIGH); // Enable RS485 driver
-    Serial.print("sent: ");
-    Serial.println(data);
+    delay(10);
     Serial1.write(data);
     Serial1.flush();
     digitalWrite(_enablePin, LOW); // Disable RS485 driver
-
-    
 }
 
-String RS485Handler::receive() {
+String RS485Handler::receive(unsigned long baseTime, unsigned long timeCorrection) {
+    digitalWrite(_enablePin, LOW); // Disable RS485 driver
     String receivedData = "";
 
-    uint8_t timeout = 0; // timeout counter
-    uint8_t limit = 100; // 100 ms
-    while (Serial1.available() == 0 && timeout < limit) {
+    unsigned long startTime = millis();
+    startTime = startTime - (baseTime + timeCorrection);
+    while (Serial1.available() == 0) {
         // Add timeout
-        timeout++;
-        delayMicroseconds(1000);
-
+        if ((millis() - startTime) >= 1000) {
+            Serial.println("RS485 timeout reached");
+            break;
+        }
     }
-    timeout = 0;
     receivedData = Serial1.readString();
-
-    Serial.print("received: ");
-    Serial.println(receivedData);
+    char vacData[11];
+    strncpy(vacData, &receivedData[2], sizeof(vacData));
+    Serial.println(vacData);
     
-    if (receivedData.length() == 0) {
-        errorHandler.setError(RS485_FAIL); // Set error state if no data is received
+    if (receivedData.length() == 0 || receivedData == "") {
+        if (errorHandler.isErrorActive(RS485_FAIL)){}
+        else{
+            errorHandler.setError(RS485_FAIL); // Set error state if no data is received
+        }
     }
     else if (errorHandler.isErrorActive(RS485_FAIL)) {
         errorHandler.clearError(RS485_FAIL); // Clear error state if data is sent successfully
