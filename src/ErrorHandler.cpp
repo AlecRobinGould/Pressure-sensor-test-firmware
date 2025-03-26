@@ -31,6 +31,13 @@ void ErrorHandler::clearError(ErrorType error) {
     }
 }
 
+void ErrorHandler::clearAllErrors() {
+    for(int i = 0; i < ERROR_COUNT; ++i) {
+        errorStates[i] = false;
+    }
+    _errorState = false;
+}
+
 bool ErrorHandler::isErrorActive(ErrorType error) const {
     if (error < ERROR_COUNT) {
         return errorStates[error];
@@ -66,24 +73,9 @@ void ErrorHandler::setError(ErrorType error) {
         // }
     } else {
         setLED(false);
-        // digitalWrite(_errorPin, HIGH);  // Turn off LED if no error
     }
 }
 
 bool ErrorHandler::hasError() const {
     return _errorState;
 }
-
-// void ErrorHandler::update() {
-//     if (_errorState) {
-//         if (!_sdHandler.logData("") && !Serial) {  // Neither SD card nor Serial is active
-//             if (millis() - _lastBlinkTime >= 125) { // Blink LED at 4 times a second (125ms on/off)
-//                 _ledState = !_ledState;
-//                 // digitalWrite(_errorPin, _ledState ? HIGH : LOW);
-//                 _lastBlinkTime = millis();
-//             }
-//         } else {
-//             digitalWrite(_errorPin, HIGH);  // Static LED when either SD or Serial is active
-//         }
-//     }
-// }

@@ -55,18 +55,30 @@ String RS485Handler::receive(unsigned long baseTime, unsigned long timeCorrectio
         }
     }
     receivedData = Serial1.readString();
+    Serial.print("RS485 received: ");
+    Serial.println(receivedData);
+    
     char vacData[11];
     strncpy(vacData, &receivedData[2], sizeof(vacData));
-    Serial.println(vacData);
     
-    if (receivedData.length() == 0 || receivedData == "") {
+    // Convert char vacData into a string
+    String vacDataS = String(vacData);
+    Serial.print("String of vacdata: ");
+    Serial.println(vacDataS);
+    
+    if (receivedData.length() == 0 || receivedData.length() == 1) {
+        Serial.println("Setting RS485 error");
         if (errorHandler.isErrorActive(RS485_FAIL)){}
         else{
             errorHandler.setError(RS485_FAIL); // Set error state if no data is received
         }
     }
     else if (errorHandler.isErrorActive(RS485_FAIL)) {
+        Serial.println("Clearing RS485 error");
         errorHandler.clearError(RS485_FAIL); // Clear error state if data is sent successfully
     }
-    return receivedData;
+    else{
+        errorHandler.clearError(RS485_FAIL); // Clear error state if data is sent successfully
+    }
+    return vacDataS;
 }

@@ -12,13 +12,10 @@ const int buttonPin = 7;
 const int errorPin = 6;
 const int logLEDPin = 5;
 
-
 unsigned long baseTime = 0;
 unsigned long setTime;
 unsigned long timeCorrection = 50;
 long baudrate = 9600;
-
-
 
 // variables
 double voltage;
@@ -58,7 +55,6 @@ void setup() {
 }
 
 void loop() {
-    
     buttonHandler.checkSerialForButtonPress();  // Check for serial input to simulate button press
     if (ButtonHandler::logState) {
         baseTime = millis();
@@ -85,10 +81,8 @@ void loop() {
 
         pressure = rs485Handler.receive(setTime, timeCorrection);
         timeCorrection = millis();
-        Serial.print("Pressure: ");
-        Serial.println(pressure);
-        strncpy(pfeiffer, &pressure[2], sizeof(pfeiffer));
-        logDataS += String(pfeiffer);
+        // strncpy(pfeiffer, &pressure[2], sizeof(pfeiffer));
+        logDataS += String(pressure);
 
         if (!sdHandler.logData(logDataS)) {
             // errorHandler.setError(SD_LOG_FAIL);
@@ -110,8 +104,8 @@ void loop() {
                 errorHandler.clearError(SD_LOG_FAIL);
                 errorHandler.clearError(SD_INIT_FAIL);
             }
-            Serial.print("logdata: ");
-            Serial.println(logDataS);
+            // Serial.print("logdata: ");
+            // Serial.println(logDataS);
         }
 
         cleaner = true;
@@ -119,7 +113,6 @@ void loop() {
 
         // This tracks the time taken to log the data and offsets the timeout delay
         timeCorrection = millis() - timeCorrection;
-        Serial.println(timeCorrection);
     }
     if (ButtonHandler::logState == false && cleaner) {
         logDataS = "";

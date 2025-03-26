@@ -19,6 +19,7 @@ public:
     ErrorHandler(int errorPin, SDHandler& sdHandler);
     void setError(ErrorType error);
     void clearError(ErrorType error);
+    void clearAllErrors();
     bool isErrorActive(ErrorType error) const;
 
     void begin();
